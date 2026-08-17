@@ -1,252 +1,301 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BORAWON - ตรวจสอบสถานะคำสั่งซื้อ</title>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #b39ddb;
-            --primary-hover: #9575cd;
-            --bg-color: #f3e5f5;
-            --card-bg: #ffffff;
-            --text-color: #4a148c;
-            --subtext-color: #6a1b9a;
-            --border-radius: 16px;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BORAWON - ตรวจสอบรายละเอียด และสถานะสินค้า</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #ECEAF4;
+      --card-bg: #FFFFFF;
+      --text-main: #000000;
+      --text-sub: #666666;
+      --btn-black: #000000;
+      --input-bg: #E0E0E0;
+      --pink-badge: #F2C4CE;
+      --green-badge: #C8E6C9;
+    }
 
-        * {
-            box-sizing: border-box;
-            font-family: 'Kanit', sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+    * { box-sizing: border-box; font-family: 'Kanit', sans-serif; margin: 0; padding: 0; }
+    body { background-color: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; padding: 24px 16px; min-height: 100vh; }
+    .container { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 16px; }
 
-        body {
-            background-color: var(--bg-color);
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
+    /* Header */
+    .header { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
+    .logo { width: 68px; height: 68px; background-color: #9E9E9E; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 15px; color: #333; flex-shrink: 0; }
+    .brand-title { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+    .brand-subtitle { font-size: 13px; color: var(--text-main); font-weight: 500; }
 
-        .container {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            box-shadow: 0 8px 24px rgba(149, 117, 205, 0.15);
-            padding: 30px;
-            width: 100%;
-            max-width: 480px;
-            text-align: center;
-        }
+    /* Cards */
+    .card { background: var(--card-bg); border-radius: 24px; padding: 20px 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+    .card-title { font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 12px; }
+    
+    /* Search Box */
+    .search-input-group { display: flex; gap: 10px; align-items: center; }
+    .search-input { flex: 1; background: var(--input-bg); border: none; padding: 12px 18px; border-radius: 30px; font-size: 13px; outline: none; color: #333; }
+    .search-btn { background: var(--btn-black); color: #fff; border: none; padding: 12px 24px; border-radius: 30px; cursor: pointer; font-weight: 600; font-size: 14px; }
+    .search-hint { font-size: 10px; color: var(--text-sub); margin-top: 8px; text-align: center; }
 
-        h1 {
-            color: var(--text-color);
-            font-size: 24px;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
+    /* FAQ Section */
+    .faq-item { border-bottom: 1px solid #E0E0E0; padding: 12px 0; }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 13px; font-weight: 500; }
+    .faq-icon { font-size: 16px; color: var(--text-sub); transition: transform 0.2s; }
+    .faq-answer { display: none; font-size: 12px; color: var(--text-sub); padding-top: 8px; line-height: 1.5; }
+    .faq-item.active .faq-answer { display: block; }
+    .faq-item.active .faq-icon { transform: rotate(45deg); }
 
-        p.subtitle {
-            color: var(--subtext-color);
-            font-size: 14px;
-            margin-bottom: 24px;
-        }
+    /* Social Links */
+    .social-title { text-align: center; font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+    .social-group { display: flex; justify-content: center; gap: 12px; }
+    .social-btn { background: var(--btn-black); color: #fff; text-decoration: none; padding: 8px 22px; border-radius: 20px; font-size: 12px; font-weight: 600; }
 
-        .search-box {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
+    /* Result Section Styling */
+    #resultArea { display: none; flex-direction: column; gap: 16px; }
+    .info-line { font-size: 16px; font-weight: bold; }
+    .address-box { font-size: 13px; line-height: 1.5; color: var(--text-main); font-weight: 500; }
+    
+    /* Product Details */
+    .product-name { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .price-list { font-size: 12px; line-height: 1.8; color: var(--text-main); margin-top: 10px; }
+    .price-list div { display: flex; justify-content: space-between; }
 
-        input[type="tel"] {
-            flex: 1;
-            padding: 12px 16px;
-            border: 2px solid #e1bee7;
-            border-radius: 12px;
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.3s;
-            text-align: center;
-        }
+    /* Status Badge & Timeline */
+    .status-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+    .badge { background: var(--green-badge); color: #2E7D32; padding: 4px 14px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    
+    .timeline { display: flex; justify-content: space-between; align-items: flex-start; position: relative; margin: 20px 0 10px 0; }
+    .timeline::before { content: ''; position: absolute; top: 16px; left: 5%; right: 5%; height: 4px; background: #D6D6D6; z-index: 1; }
+    .step { z-index: 2; display: flex; flex-direction: column; align-items: center; width: 14%; text-align: center; }
+    .step-icon { width: 32px; height: 32px; border-radius: 50%; background: #A5D6A7; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+    .step.inactive .step-icon { background: #BDBDBD; }
+    .step-label { font-size: 8px; color: var(--text-sub); margin-top: 6px; line-height: 1.1; }
 
-        input[type="tel"]:focus {
-            border-color: var(--primary-color);
-        }
+    /* Tracking Box */
+    .tracking-group { display: flex; gap: 10px; margin-top: 8px; }
+    .tracking-input { flex: 1; background: var(--pink-badge); border: none; padding: 10px 16px; border-radius: 20px; font-size: 12px; color: #444; }
+    .copy-btn { background: var(--btn-black); color: #fff; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 600; }
 
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 12px 20px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .loading {
-            display: none;
-            color: var(--subtext-color);
-            margin: 20px 0;
-        }
-
-        .result-card {
-            display: none;
-            text-align: left;
-            background: #faf5fb;
-            border: 1px solid #e1bee7;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-
-        .result-card h3 {
-            color: var(--text-color);
-            font-size: 18px;
-            margin-bottom: 12px;
-            border-bottom: 2px dashed #ce93d8;
-            padding-bottom: 8px;
-        }
-
-        .info-row {
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .info-label {
-            font-weight: 500;
-            color: var(--subtext-color);
-        }
-
-        .item-list {
-            margin-top: 12px;
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #f3e5f5;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-            background: #e1bee7;
-            color: var(--text-color);
-        }
-
-        .error-message {
-            display: none;
-            color: #e53935;
-            background: #ffebee;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 20px;
-            font-size: 14px;
-        }
-    </style>
+    .divider { height: 1px; background: #EAEAEA; margin: 14px 0; }
+    .back-btn { background: transparent; border: 1px solid var(--btn-black); color: var(--btn-black); padding: 8px; border-radius: 20px; font-size: 12px; cursor: pointer; text-align: center; font-weight: 500; }
+  </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>BORAWON</h1>
-    <p class="subtitle">ตรวจสอบสถานะคำสั่งซื้อของคุณ</p>
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">LOGO</div>
+    <div>
+      <div class="brand-title">BORAWON</div>
+      <div class="brand-subtitle">ตรวจสอบรายละเอียด และสถานะสินค้า</div>
+    </div>
+  </div>
 
-    <div class="search-box">
-        <input type="tel" id="phoneInput" placeholder="กรอกเบอร์โทรศัพท์" maxlength="10">
-        <button onclick="searchOrder()">ค้นหา</button>
+  <!-- MAIN SEARCH & FAQ VIEW (รูปที่ 1) -->
+  <div id="mainView" style="display: flex; flex-direction: column; gap: 16px;">
+    <!-- Search Card -->
+    <div class="card">
+      <div class="card-title">ค้นหารายละเอียดสินค้า</div>
+      <div class="search-input-group">
+        <input type="text" id="phoneInput" class="search-input" placeholder="เบอร์โทร เช่น 0912345678">
+        <button class="search-btn" onclick="searchOrder()">ค้นหา</button>
+      </div>
+      <div class="search-hint">ต้องกรอกเบอร์โทรที่ให้ทางร้านไว้</div>
     </div>
 
-    <div id="loading" class="loading">กำลังค้นหาข้อมูล... ⏳</div>
-    <div id="errorMessage" class="error-message"></div>
-
-    <div id="resultCard" class="result-card">
-        <h3 id="lineName">คุณลูกค้า</h3>
-        <div class="info-row"><span class="info-label">ขนส่ง:</span> <span id="courier">-</span></div>
-        <div class="info-row"><span class="info-label">พัสดุ/Tracking:</span> <span id="tracking">-</span></div>
-        <div class="info-row"><span class="info-label">ที่อยู่จัดส่ง:</span> <span id="address">-</span></div>
-        
-        <div class="item-list">
-            <div class="info-label" style="margin-bottom: 6px;">รายการสินค้าที่สั่งซื้อ:</div>
-            <div id="itemsContainer"></div>
+    <!-- FAQ Card -->
+    <div class="card">
+      <div class="card-title">คำถามที่พบบ่อย</div>
+      
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-header">
+          <span>📦 จะได้รับสินค้าเมื่อไหร่?</span>
+          <span class="faq-icon">+</span>
         </div>
+        <div class="faq-answer">โดยปกติสินค้าพรีออเดอร์จะใช้เวลาจัดส่งจากเกาหลีมาไทยประมาณ 15-30 วันหลังจากเว็บจัดส่งครับ</div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-header">
+          <span>💸 การชำระเงินมัดจำ ส่วนที่เหลือ</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-answer">สามารถชำระส่วนที่เหลือได้ตามกำหนดเวลาที่แจ้งไว้ในรายละเอียดออเดอร์ครับ</div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-header">
+          <span>🚚 ใช้ขนส่งอะไร</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-answer">ทางร้านใช้ขนส่ง ไปรษณีย์ไทย (EMS/ลงทะเบียน) และ Flash Express ครับ</div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-header">
+          <span>❌ ยกเลิก และขอเงินคืนได้ไหม?</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-answer">เมื่อสั่งซื้อและกดสินค้าเรียบร้อยแล้ว ไม่สามารถยกเลิกหรือคืนเงินได้ทุกกรณีครับ</div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-header">
+          <span>🔮 เงื่อนไขการสั่งซื้อสินค้า</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-answer">กรุณาถ่ายวิดีโอขณะแกะกล่องพัสดุไว้เป็นหลักฐานทุกครั้ง เพื่อใช้ในการเคลมสินค้าครับ</div>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-header">
+          <span>🪪 สินค้าการวมค่าส่งออกจากเกาหลี และภาษีแล้วหรือยัง?</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-answer">ราคาสินค้าเคลียร์ภาษีและค่าส่งกลับไทยเรียบร้อยแล้ว ไม่มีเก็บเพิ่มย้อนหลังครับ</div>
+      </div>
     </div>
+
+    <!-- Social Card -->
+    <div class="card">
+      <div class="social-title">ช่องทางการติดตาม</div>
+      <div class="social-group">
+        <a href="#" class="social-btn">TIKTOK</a>
+        <a href="#" class="social-btn">X</a>
+        <a href="#" class="social-btn">LINE</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="loading" style="display:none; text-align:center; padding: 10px; font-size:13px;">กำลังค้นหาข้อมูล...</div>
+  <div id="errorMsg" style="display:none; color:red; text-align:center; font-size:13px; background:#fff; padding:12px; border-radius:12px;">ไม่พบข้อมูลเบอร์โทรศัพท์นี้ในระบบ</div>
+
+  <!-- RESULT VIEW (รูปที่ 2) -->
+  <div id="resultArea">
+    <button class="back-btn" onclick="goBack()">← กลับไปหน้าค้นหา</button>
+
+    <!-- User Details -->
+    <div class="card">
+      <div style="font-size:11px; color:var(--text-sub); margin-bottom:4px;">รายละเอียดสินค้าของคุณ</div>
+      <div class="info-line" id="userInfo">ชื่อ LINE | เบอร์โทร</div>
+    </div>
+
+    <!-- Address -->
+    <div class="card">
+      <div style="font-size:12px; font-weight:600; margin-bottom:6px;">🏡 ที่อยู่จัดส่ง</div>
+      <div class="address-box" id="userAddress">ที่อยู่จัดส่งของลูกค้า</div>
+    </div>
+
+    <!-- Product & Status -->
+    <div class="card">
+      <div style="font-size:12px; font-weight:600; margin-bottom:10px;">🛍️ รายการสินค้า</div>
+      <div id="itemsContainer"></div>
+
+      <div class="divider"></div>
+
+      <!-- Timeline -->
+      <div class="status-row">
+        <span style="font-size:13px; font-weight:600;">สถานะของสินค้า</span>
+        <span class="badge" id="statusBadge">จัดส่งแล้ว</span>
+      </div>
+
+      <div class="timeline">
+        <div class="step"><div class="step-icon">💵</div><div class="step-label">โอนเงินแล้ว</div></div>
+        <div class="step"><div class="step-icon">🛍️</div><div class="step-label">กดสินค้าแล้ว</div></div>
+        <div class="step"><div class="step-icon">🇰🇷</div><div class="step-label">รอเว็บจัดส่ง</div></div>
+        <div class="step"><div class="step-icon">✈️</div><div class="step-label">กำลังส่งมาไทย</div></div>
+        <div class="step"><div class="step-icon">📦</div><div class="step-label">สินค้าถึงไทยแล้ว</div></div>
+        <div class="step"><div class="step-icon">🎁</div><div class="step-label">แพ็กของแล้ว</div></div>
+        <div class="step"><div class="step-icon">🚛</div><div class="step-label">จัดส่งแล้ว</div></div>
+      </div>
+
+      <div style="font-size:11px; font-weight:600; color:var(--text-sub);">รายละเอียด</div>
+      <div style="font-size:12px; color:var(--text-main); margin-top:4px;" id="noteDetail">
+        Weverse Shop เริ่มจัดส่ง 7 สิงหาคม 2026 - 14 สิงหาคม 2026<br>คาดว่าสินค้าจะถึงประเทศไทย ปลายเดือนตุลาคม 2026
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Tracking -->
+      <div style="font-size:12px; font-weight:600;">เลขพัสดุ</div>
+      <div class="tracking-group">
+        <input type="text" id="trackingInput" class="tracking-input" readonly value="Thailand Post : -">
+        <button class="copy-btn" onclick="copyTracking()">คัดลอก</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-    // URL Web App จาก Google Apps Script ของคุณ
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyawlKPPgxORHTm2TDDdCkiNlhnn2D6IQqrFXbwky4GHVApO23eJoqHAHfC5c8k5lN1/exec';
+  // URL จาก Apps Script ของคุณ
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyawlKPPgxORHTm2TDDdCkiNlhnn2D6IQqrFXbwky4GHVApO23eJoqHAHfC5c8k5lN1/exec";
 
-    async function searchOrder() {
-        const phone = document.getElementById('phoneInput').value.trim();
-        const loading = document.getElementById('loading');
-        const resultCard = document.getElementById('resultCard');
-        const errorMessage = document.getElementById('errorMessage');
+  function toggleFaq(element) {
+    element.classList.toggle('active');
+  }
 
-        if (!phone) {
-            alert('กรุณากรอกเบอร์โทรศัพท์ครับ');
-            return;
-        }
+  function searchOrder() {
+    const phone = document.getElementById('phoneInput').value.trim();
+    if (!phone) return alert('กรุณากรอกเบอร์โทรศัพท์');
 
-        loading.style.display = 'block';
-        resultCard.style.display = 'none';
-        errorMessage.style.display = 'none';
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('errorMsg').style.display = 'none';
 
-        try {
-            const response = await fetch(`${SCRIPT_URL}?phone=${encodeURIComponent(phone)}`);
-            const json = await response.json();
+    fetch(`${SCRIPT_URL}?phone=${encodeURIComponent(phone)}`)
+      .then(res => res.json())
+      .then(res => {
+        document.getElementById('loading').style.display = 'none';
+        if (res.status === 'success') {
+          const data = res.data;
+          
+          // ซ่อนหน้าแรก แสดงหน้าผลลัพธ์
+          document.getElementById('mainView').style.display = 'none';
+          document.getElementById('resultArea').style.display = 'flex';
 
-            loading.style.display = 'none';
-
-            if (json.status === 'success' && json.data) {
-                const data = json.data;
-                document.getElementById('lineName').innerText = `คุณ ${data.line_name || 'ลูกค้า'}`;
-                document.getElementById('courier').innerText = data.courier || '-';
-                document.getElementById('tracking').innerText = data.tracking || 'ยังไม่มีเลขพัสดุ';
-                document.getElementById('address').innerText = data.address || '-';
-
-                // จัดการ JSON แสดงรายการสินค้า
-                const itemsContainer = document.getElementById('itemsContainer');
-                itemsContainer.innerHTML = '';
-
-                try {
-                    const items = typeof data.items_json === 'string' ? JSON.parse(data.items_json) : data.items_json;
-                    if (Array.isArray(items) && items.length > 0) {
-                        items.forEach(item => {
-                            const div = document.createElement('div');
-                            div.style.marginBottom = '6px';
-                            div.innerHTML = `• <b>${item.name || 'สินค้า'}</b> x${item.qty || 1} <span class="status-badge">${item.status || 'รอดำเนินการ'}</span>`;
-                            itemsContainer.appendChild(div);
-                        });
-                    } else {
-                        itemsContainer.innerHTML = '<div>ไม่มีรายการสินค้า</div>';
-                    }
-                } catch (e) {
-                    itemsContainer.innerHTML = `<div>${data.items_json || '-'}</div>`;
-                }
-
-                resultCard.style.display = 'block';
+          // ใส่ข้อมูลใน UI
+          document.getElementById('userInfo').innerText = `${data.line_name || '-'} | ${data.phone}`;
+          document.getElementById('userAddress').innerText = data.address || '-';
+          document.getElementById('trackingInput').value = `${data.courier || 'Thailand Post'} : ${data.tracking || 'ยังไม่มีเลขพัสดุ'}`;
+          
+          // Render สินค้า
+          const container = document.getElementById('itemsContainer');
+          container.innerHTML = '';
+          try {
+            const items = typeof data.items_json === 'string' ? JSON.parse(data.items_json) : data.items_json;
+            if(Array.isArray(items)) {
+              items.forEach(item => {
+                container.innerHTML += `<div class="product-name">• ${item.name} x${item.qty || 1}</div>`;
+              });
             } else {
-                errorMessage.innerText = json.message || 'ไม่พบข้อมูลคำสั่งซื้อจากเบอร์โทรนี้ครับ';
-                errorMessage.style.display = 'block';
+              container.innerHTML += `<div class="product-name">• ${data.items_json}</div>`;
             }
-        } catch (err) {
-            loading.style.display = 'none';
-            errorMessage.innerText = 'เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง';
-            errorMessage.style.display = 'block';
-            console.error(err);
+          } catch(e) {
+            container.innerHTML += `<div class="product-name">• ${data.items_json || '-'}</div>`;
+          }
+
+        } else {
+          document.getElementById('errorMsg').style.display = 'block';
         }
-    }
+      })
+      .catch(err => {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('errorMsg').style.display = 'block';
+      });
+  }
+
+  function goBack() {
+    document.getElementById('resultArea').style.display = 'none';
+    document.getElementById('mainView').style.display = 'flex';
+    document.getElementById('phoneInput').value = '';
+  }
+
+  function copyTracking() {
+    const trackingText = document.getElementById('trackingInput').value;
+    navigator.clipboard.writeText(trackingText);
+    alert('คัดลอกเรียบร้อยแล้ว!');
+  }
 </script>
 
 </body>
