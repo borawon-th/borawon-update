@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BORAWON - ตรวจสอบสถานะคำสั่งซื้อ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #b39ddb;
+            --primary-hover: #9575cd;
+            --bg-color: #f3e5f5;
+            --card-bg: #ffffff;
+            --text-color: #4a148c;
+            --subtext-color: #6a1b9a;
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Kanit', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 24px rgba(149, 117, 205, 0.15);
+            padding: 30px;
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--text-color);
+            font-size: 24px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        p.subtitle {
+            color: var(--subtext-color);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="tel"] {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e1bee7;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+            text-align: center;
+        }
+
+        input[type="tel"]:focus {
+            border-color: var(--primary-color);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .loading {
+            display: none;
+            color: var(--subtext-color);
+            margin: 20px 0;
+        }
+
+        .result-card {
+            display: none;
+            text-align: left;
+            background: #faf5fb;
+            border: 1px solid #e1bee7;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .result-card h3 {
+            color: var(--text-color);
+            font-size: 18px;
+            margin-bottom: 12px;
+            border-bottom: 2px dashed #ce93d8;
+            padding-bottom: 8px;
+        }
+
+        .info-row {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: var(--subtext-color);
+        }
+
+        .item-list {
+            margin-top: 12px;
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #f3e5f5;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #e1bee7;
+            color: var(--text-color);
+        }
+
+        .error-message {
+            display: none;
+            color: #e53935;
+            background: #ffebee;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>BORAWON</h1>
+    <p class="subtitle">ตรวจสอบสถานะคำสั่งซื้อของคุณ</p>
+
+    <div class="search-box">
+        <input type="tel" id="phoneInput" placeholder="กรอกเบอร์โทรศัพท์" maxlength="10">
+        <button onclick="searchOrder()">ค้นหา</button>
+    </div>
+
+    <div id="loading" class="loading">กำลังค้นหาข้อมูล... ⏳</div>
+    <div id="errorMessage" class="error-message"></div>
+
+    <div id="resultCard" class="result-card">
+        <h3 id="lineName">คุณลูกค้า</h3>
+        <div class="info-row"><span class="info-label">ขนส่ง:</span> <span id="courier">-</span></div>
+        <div class="info-row"><span class="info-label">พัสดุ/Tracking:</span> <span id="tracking">-</span></div>
+        <div class="info-row"><span class="info-label">ที่อยู่จัดส่ง:</span> <span id="address">-</span></div>
+        
+        <div class="item-list">
+            <div class="info-label" style="margin-bottom: 6px;">รายการสินค้าที่สั่งซื้อ:</div>
+            <div id="itemsContainer"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // URL Web App จาก Google Apps Script ของคุณ
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyaN5WbgeTMvBUu35_bPgluW7-9JsAxwXEVAHLsn3ijsD8voppY_36H5Mxjc1e4lyyO/exec';
+
+    async function searchOrder() {
+        const phone = document.getElementById('phoneInput').value.trim();
+        const loading = document.getElementById('loading');
+        const resultCard = document.getElementById('resultCard');
+        const errorMessage = document.getElementById('errorMessage');
+
+        if (!phone) {
+            alert('กรุณากรอกเบอร์โทรศัพท์ครับ');
+            return;
+        }
+
+        loading.style.display = 'block';
+        resultCard.style.display = 'none';
+        errorMessage.style.display = 'none';
+
+        try {
+            const response = await fetch(`${SCRIPT_URL}?phone=${encodeURIComponent(phone)}`);
+            const json = await response.json();
+
+            loading.style.display = 'none';
+
+            if (json.status === 'success' && json.data) {
+                const data = json.data;
+                document.getElementById('lineName').innerText = `คุณ ${data.line_name || 'ลูกค้า'}`;
+                document.getElementById('courier').innerText = data.courier || '-';
+                document.getElementById('tracking').innerText = data.tracking || 'ยังไม่มีเลขพัสดุ';
+                document.getElementById('address').innerText = data.address || '-';
+
+                // จัดการ JSON แสดงรายการสินค้า
+                const itemsContainer = document.getElementById('itemsContainer');
+                itemsContainer.innerHTML = '';
+
+                try {
+                    const items = typeof data.items_json === 'string' ? JSON.parse(data.items_json) : data.items_json;
+                    if (Array.isArray(items) && items.length > 0) {
+                        items.forEach(item => {
+                            const div = document.createElement('div');
+                            div.style.marginBottom = '6px';
+                            div.innerHTML = `• <b>${item.name || 'สินค้า'}</b> x${item.qty || 1} <span class="status-badge">${item.status || 'รอดำเนินการ'}</span>`;
+                            itemsContainer.appendChild(div);
+                        });
+                    } else {
+                        itemsContainer.innerHTML = '<div>ไม่มีรายการสินค้า</div>';
+                    }
+                } catch (e) {
+                    itemsContainer.innerHTML = `<div>${data.items_json || '-'}</div>`;
+                }
+
+                resultCard.style.display = 'block';
+            } else {
+                errorMessage.innerText = json.message || 'ไม่พบข้อมูลคำสั่งซื้อจากเบอร์โทรนี้ครับ';
+                errorMessage.style.display = 'block';
+            }
+        } catch (err) {
+            loading.style.display = 'none';
+            errorMessage.innerText = 'เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง';
+            errorMessage.style.display = 'block';
+            console.error(err);
+        }
+    }
+</script>
+
+</body>
+</html>
